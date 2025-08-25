@@ -1,0 +1,43 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "plugins": {
+    "postgres": {
+      "databaseName": "markright"
+    },
+    "redis": {}
+  },
+  "services": [
+    {
+      "name": "backend",
+      "source": {
+        "dockerfilePath": "backend/Dockerfile"
+      },
+      "env": {
+        "DATABASE_URL": "${{ Postgres.DATABASE_URL }}",
+        "REDIS_URL": "${{ Redis.REDIS_URL }}",
+        "AWS_REGION": "eu-central-1"
+      }
+    },
+    {
+      "name": "worker",
+      "source": {
+        "dockerfilePath": "backend/Dockerfile"
+      },
+      "env": {
+        "DATABASE_URL": "${{ Postgres.DATABASE_URL }}",
+        "REDIS_URL": "${{ Redis.REDIS_URL }}",
+        "AWS_REGION": "eu-central-1"
+      },
+      "startCommand": "celery -A backend.worker.celery_app worker --loglevel=info"
+    },
+    {
+      "name": "frontend",
+      "source": {
+        "dockerfilePath": "frontend/Dockerfile"
+      },
+      "env": {
+        "NEXT_PUBLIC_BACKEND_URL": "${{backend.PUBLIC_URL}}"
+      }
+    }
+  ]
+}
