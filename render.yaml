@@ -58,7 +58,7 @@ services:
       - key: AWS_REGION
         value: eu-central-1
     dockerCommand: celery -A backend.worker worker --loglevel=info
-    healthCheckPath: /v1/health
+   
 
   - type: web
     name: markright-frontend
