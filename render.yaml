@@ -7,11 +7,13 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        fromDatabase: markright-db
-        property: connectionString
+        fromDatabase:
+          name: markright-db
+          property: connectionString
       - key: REDIS_URL
-        fromService: markright-redis
-        name: Redis URL
+        fromService:
+          name: markright-redis
+          property: url
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -34,12 +36,20 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        fromDatabase: markright-db
-        property: connectionString
+        fromDatabase:
+          name: markright-db
+          property: connectionString
       - key: REDIS_URL
-        fromService: markright-redis
-        name: Redis URL
+        fromService:
+          name: markright-redis
+          property: url
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          name: markright-backend
+          property: url
       - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: AWS_ACCESS_KEY_ID
         sync: false
@@ -49,7 +59,8 @@ services:
         sync: false
       - key: AWS_REGION
         value: eu-central-1
-    dockerCommand: ["bash","-lc","celery -A backend.worker.celery_app worker --loglevel=info"]
+    dockerCommand: bash -lc "celery -A backend.worker worker --loglevel=info"
+    healthCheckPath: /v1/health
 
   - type: web
     name: markright-frontend
@@ -59,13 +70,16 @@ services:
     autoDeploy: true
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
-        fromService: markright-backend
-        property: url
+        fromService:
+          name: markright-backend
+          property: url
+    healthCheckPath: /
+
+  - type: redis
+    name: markright-redis
+    plan: free
+
 
 databases:
   - name: markright-db
-    ipAllowList: []
-
-redis:
-  - name: markright-redis
     plan: free
