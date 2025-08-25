@@ -13,7 +13,8 @@ services:
       - key: REDIS_URL
         fromService:
           name: markright-redis
-          property: url
+          type: keyvalue
+          property: connectionString
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -42,11 +43,8 @@ services:
       - key: REDIS_URL
         fromService:
           name: markright-redis
-          property: url
-      - key: NEXT_PUBLIC_BACKEND_URL
-        fromService:
-          name: markright-backend
-          property: url
+          type: keyvalue
+          property: connectionString
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -59,7 +57,7 @@ services:
         sync: false
       - key: AWS_REGION
         value: eu-central-1
-    dockerCommand: bash -lc "celery -A backend.worker worker --loglevel=info"
+    dockerCommand: celery -A backend.worker worker --loglevel=info
     healthCheckPath: /v1/health
 
   - type: web
@@ -72,14 +70,16 @@ services:
       - key: NEXT_PUBLIC_BACKEND_URL
         fromService:
           name: markright-backend
-          property: url
+          type: web
+          property: hostport
     healthCheckPath: /
 
-  - type: redis
+  - type: keyvalue
     name: markright-redis
     plan: free
-
+    ipAllowList: []
 
 databases:
   - name: markright-db
     plan: free
+    ipAllowList: []
